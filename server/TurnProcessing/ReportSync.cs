@@ -30,18 +30,18 @@ public class ReportSync : InTurnContext {
     public long PlayerId { get; }
     public int TurnNumber { get; }
     public JReport Report { get; }
-    public RegionDic Regions { get; } = new ();
-    public StructuresDic Structures { get; } = new ();
-    public UnitsDic Units { get; } = new ();
-    public FactionsDic Factions { get; } = new ();
+    public RegionDic Regions { get; } = [];
+    public StructuresDic Structures { get; } = [];
+    public UnitsDic Units { get; } = [];
+    public FactionsDic Factions { get; } = [];
 
-    public HashSet<string> ProcessedShips = new ();
-    public Dictionary<string, DbStructure> PendingShips = new ();
+    public HashSet<string> ProcessedShips = [];
+    public Dictionary<string, DbStructure> PendingShips = [];
 
-    public HashSet<int> NewFactions { get; } = new ();
-    public HashSet<string> NewRegions { get; } = new ();
-    public HashSet<string> NewStructures { get; } = new ();
-    public HashSet<int> NewUnits { get; } = new ();
+    public HashSet<int> NewFactions { get; } = [];
+    public HashSet<string> NewRegions { get; } = [];
+    public HashSet<string> NewStructures { get; } = [];
+    public HashSet<int> NewUnits { get; } = [];
 
     public void Load(DbPlayerTurn turn) {
         foreach (var region in turn.Regions) {

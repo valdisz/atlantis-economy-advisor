@@ -13,24 +13,52 @@ using advisor.IO.Traits;
 using advisor.Model;
 using LanguageExt.Effects.Traits;
 using LanguageExt.Sys.Traits;
-using LanguageExt.UnsafeValueAccess;
+using -.UnsafeValueAccess;
 
-public class TurnRunner<RT> where RT: struct, HasCancel<RT>, HasUnix<RT>, HasDirectory<RT>, HasFile<RT> {
-    public TurnRunner(TurnRunnerOptions options) {
-        this.options = options;
+public readonly struct TurnRunnerIO : Traits.TurnRunnerIO {
+    public readonly static Traits.TurnRunnerIO Default =
+        new TurnRunnerIO();
+
+    public string WorkingDirectory => throw new NotImplementedException();
+
+    public string EngineFileName => throw new NotImplementedException();
+
+    public string PlayersInFileName => throw new NotImplementedException();
+
+    public string PlayersOutFileName => throw new NotImplementedException();
+
+    public string GameInFileName => throw new NotImplementedException();
+
+    public string GameOutFileName => throw new NotImplementedException();
+
+    public Regex ReportFileFormat => throw new NotImplementedException();
+
+    public Regex TemplateFileFormat => throw new NotImplementedException();
+
+    public Regex ArticleFileFormat => throw new NotImplementedException();
+
+    public string FormatOrdersFileName(FactionNumber factionNumber)
+    {
+        throw new NotImplementedException();
     }
+}
 
-    public static TurnRunner<RT> New(TurnRunnerOptions options) =>
-        new (options);
+public interface HasTurnRunner<out RT>: HasCancel<RT>, HasUnix<RT>, HasDirectory<RT>, HasFile<RT>
+    where RT : struct, HasTurnRunner<RT>  {
 
-    public static Aff<RT, A> Use<A>(TurnRunnerOptions options, Func<TurnRunner<RT>, Aff<RT, A>> map) =>
+    Eff<RT, Traits.TurnRunnerIO> TurnRunnerEff { get; }
+}
+
+public static class TurnRunner<RT>
+    where RT: struct, HasTurnRunner<RT> {
+    public static Aff<RT, A> Use<A>(Func<TurnRunner<RT>, Aff<RT, A>> map) =>
         from runner in Eff(() => New(options))
         from ret in run(runner, map) | @catch(cleanup<A>(runner))
         select ret;
 
-    static Aff<RT, A> run<A>(TurnRunner<RT> runner, Func<TurnRunner<RT>, Aff<RT, A>> map) =>
+    static Aff<RT, A> run<A>(Func<TurnRunner<RT>, Aff<RT, A>> map) =>
         from a in map(runner)
-        from _ in runner.Clean()
+        from _ in default(RT) runner.Clean()
         select a;
 
     static Aff<RT, A> cleanup<A>(TurnRunner<RT> runner) =>
@@ -142,11 +170,9 @@ public class TurnRunner<RT> where RT: struct, HasCancel<RT>, HasUnix<RT>, HasDir
             return None;
         }
 
-        if (!int.TryParse(match.Groups[1].Value, out var number)) {
-            return None;
-        }
-
-        return Some(FactionNumber.New(number));
+        return int.TryParse(match.Groups[1].Value, out var number)
+            ? Some(FactionNumber.New(number))
+            : None;
     }
 
     public Eff<RT, Seq<FactionFile>> listGameFiles(Regex pattern) =>

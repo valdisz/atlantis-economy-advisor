@@ -13,7 +13,7 @@ public class PlayersFileReader : IEnumerable<FactionRecord> {
     private readonly Stream stream;
 
     public IEnumerator<FactionRecord> GetEnumerator() {
-        (string key, string value) parse(string s) {
+        static (string key, string value) parse(string s) {
             var kv = s.Split(":");
             return (kv[0].Trim(), kv[1].Trim());
         }
@@ -47,15 +47,15 @@ public class PlayersFileReader : IEnumerable<FactionRecord> {
                 case "Name": {
                     if (!rec.IsNew) {
                         var numberLen = rec.Number.ToString().Length + 2;
-                        value = value.Substring(0, value.Length - numberLen).Trim();
+                        value = value[..^numberLen].Trim();
                     }
 
-                    rec.Props.Add(key, value);
+                    rec.Add(key, value);
                     break;
                 }
 
                 default: {
-                    rec.Props.Add(key, value);
+                    rec.Add(key, value);
                     break;
                 }
             }

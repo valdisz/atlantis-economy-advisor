@@ -14,7 +14,7 @@ public class StructureParserSpec {
     [InlineData("+ Ruin [1] : Ruin, closed to player units.")]
     [InlineData("+ The Kings Highway [1] : Road N.")]
     [InlineData("+ Trade Academy [NIMB] [Nort Triders] [2] : Tower; comment.")]
-    public void foo(string s) {
+    public void CanParseBuildings(string s) {
         s.Should().NotBeNullOrEmpty();
         // var parser = new StructureParser();
         // var result = parser.Parse(new TextParser(0, s));

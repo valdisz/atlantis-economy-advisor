@@ -8,11 +8,8 @@ public record FactionRecord(int? Number = null) {
         set => SetStr("Name", value);
     }
 
-    // ToDo: can be set multiple times
-    public bool RewardTimes {
-        get => HasFlag("RewardTimes");
-        set => TogglFlag("RewardTimes", value);
-    }
+    public List<int> RewardTimes => GetAllInt("RewardTimes");
+    public void AddRewardTime(int value) => SetInt("RewardTimes", value, true);
 
     public string Email {
         get => GetStr("Email");
@@ -39,14 +36,11 @@ public record FactionRecord(int? Number = null) {
         set => SetStr("Template", value);
     }
 
-    // ToDo: can be set multiple times
-    public int? Reward {
-        get => GetInt("Reward");
-        set => SetInt("Reward", value);
-    }
+    public List<string> Rewards => GetAllStr("Reward");
+    public void AddReward(string value) => SetStr("Reward", value, true);
 
     public bool SendTimes {
-        get => HasFlag("SendTimes");
+        get => HasProp("SendTimes");
         set => TogglFlag("SendTimes", value);
     }
 
@@ -83,27 +77,38 @@ public record FactionRecord(int? Number = null) {
 
     public bool IsNew => Number == null;
 
-    public Dictionary<string, string> Props { get; init; } = new ();
+    public List<(string, string)> Props { get; init; } = [];
 
-    private bool HasFlag(string name) => Props.ContainsKey(name);
+    public void Add(string name, string value) => Props.Add((name, value));
 
-    private void SetFlag(string name) {
-        if (HasFlag(name)) {
+    public bool HasProp(string name) {
+        for (var i = 0; i < Props.Count; i++) {
+            if (Props[i].Item1 == name) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void SetFlag(string name) {
+        if (HasProp(name)) {
             return;
         }
 
-        Props.Add(name, null);
+        Add(name, null);
     }
 
-    private void ClearFlag(string name) {
-        if (!HasFlag(name)) {
-            return;
+    public void ClearFlag(string name) {
+        for (var i = 0; i < Props.Count; i++) {
+            if (Props[i].Item1 == name) {
+                Props.RemoveAt(i);
+                return;
+            }
         }
-
-        Props.Remove(name);
     }
 
-    private void TogglFlag(string name, bool set) {
+    public void TogglFlag(string name, bool set) {
         if (set) {
             SetFlag(name);
         }
@@ -112,23 +117,56 @@ public record FactionRecord(int? Number = null) {
         }
     }
 
-    private string GetStr(string name) => Props.Get(name);
+    public string GetStr(string name) {
+        for (var i = 0; i < Props.Count; i++) {
+            if (Props[i].Item1 == name) {
+                return Props[i].Item2;
+            }
+        }
 
-    private void SetStr(string name, string value) {
-        if (value == null && Props.ContainsKey(name)) {
-            Props.Remove(name);
+        return null;
+    }
+
+    public List<string> GetAllStr(string name) {
+        var result = new List<string>();
+        for (var i = 0; i < Props.Count; i++) {
+            if (Props[i].Item1 == name) {
+                var value = Props[i].Item2;
+                if (string.IsNullOrWhiteSpace(value)) {
+                    continue;
+                }
+
+                result.Add(value);
+            }
+        }
+
+        return result;
+    }
+
+    public void SetStr(string name, string value, bool multiple = false) {
+        if (multiple) {
+            Add(name, value);
             return;
         }
 
-        Props[name] = value;
+        for (var i = 0; i < Props.Count; i++) {
+            if (Props[i].Item1 == name) {
+                Props[i] = (name, value);
+                return;
+            }
+        }
+
+        Props.Add((name, value));
     }
 
-    private int? GetInt(string name) {
+    public int? GetInt(string name) {
         var value = GetStr(name);
         return value == null
             ? null
             : int.Parse(value);
     }
 
-    private void SetInt(string name, int? value) => SetStr(name, value?.ToString());
+    public List<int> GetAllInt(string name) => GetAllStr(name).ConvertAll(int.Parse);
+
+    public void SetInt(string name, int? value, bool multiple = false) => SetStr(name, value?.ToString(), multiple);
 }

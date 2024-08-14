@@ -48,7 +48,9 @@ export function Authenticate({ children }: React.PropsWithChildren<AuthenticateP
             },
             (err: ApolloError) => {
                 const is401 = (err.networkError as any)?.statusCode === 401
-                const isNotAuthorized = err.graphQLErrors?.some(x => x.extensions['code'] === 'AUTH_NOT_AUTHORIZED')
+                const isNotAuthorized = err.graphQLErrors
+                    ?.map(x => x.extensions['code'])
+                    ?.some(x => x === 'AUTH_NOT_AUTHORIZED' || x === 'AUTH_NOT_AUTHENTICATED')
 
                 return is401 || isNotAuthorized ? 'sign-in' : 'error'
             }

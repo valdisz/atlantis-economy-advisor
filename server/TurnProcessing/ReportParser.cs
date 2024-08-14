@@ -38,6 +38,6 @@ public class ReportParser : IReportParser {
 
     public async Task<string> ToJsonStringAsync(TextReader reader) {
         var json = await ToJsonAsync(reader);
-        return json.ToString(Newtonsoft.Json.Formatting.None);
+        return json.ToString(Formatting.None);
     }
 }

@@ -1,50 +1,50 @@
-namespace advisor {
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Http;
+namespace advisor;
 
-    public class DefaultFilesMiddleware {
-        public DefaultFilesMiddleware(RequestDelegate next, IWebHostEnvironment hostingEnv) {
-            this.next = next;
-            this.hostingEnv = hostingEnv;
-        }
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
-        private readonly RequestDelegate next;
-        private readonly IWebHostEnvironment hostingEnv;
+public class DefaultFilesMiddleware {
+    public DefaultFilesMiddleware(RequestDelegate next, IWebHostEnvironment hostingEnv) {
+        this.next = next;
+        this.hostingEnv = hostingEnv;
+    }
 
-        private readonly Regex filePattern = new Regex(@"\.\w+$");
-        private readonly PathString[] apiSegments = new PathString[] {
-            "/graphql",
-            "/api",
-            "/account",
-            "/hangfire",
-            "/system",
-        };
+    private readonly RequestDelegate next;
+    private readonly IWebHostEnvironment hostingEnv;
 
-        public Task Invoke(HttpContext context) {
-            var method = context.Request.Method.ToLowerInvariant();
-            if (method != "get" && method != "head") return next(context);
+    private readonly Regex filePattern = new(@"\.\w+$");
+    private readonly PathString[] apiSegments = [
+        "/graphql",
+        "/api",
+        "/account",
+        "/hangfire",
+        "/system",
+    ];
 
-            var path = context.Request.Path;
-            if (apiSegments.Any(x => path.StartsWithSegments(x))) {
-                return next(context);
-            }
+    public Task Invoke(HttpContext context) {
+        var method = context.Request.Method.ToLowerInvariant();
+        if (method != "get" && method != "head") return next(context);
 
-            if (!path.HasValue || !IsFile(path)) {
-                context.Request.Path = new PathString("/index.html");
-                return next(context);
-            }
-
+        var path = context.Request.Path;
+        if (apiSegments.Any(x => path.StartsWithSegments(x))) {
             return next(context);
         }
 
-        public bool IsFile(string path) {
-            var lastSlash = path.LastIndexOf("/");
-            var match = filePattern.IsMatch(lastSlash >= 0 ? path.Substring(lastSlash) : path);
-
-            return match;
+        if (!path.HasValue || !IsFile(path)) {
+            context.Request.Path = new PathString("/index.html");
+            return next(context);
         }
+
+        return next(context);
+    }
+
+    public bool IsFile(string path) {
+        var lastSlash = path.LastIndexOf("/");
+        var match = filePattern.IsMatch(lastSlash >= 0 ? path[lastSlash..] : path);
+
+        return match;
     }
 }

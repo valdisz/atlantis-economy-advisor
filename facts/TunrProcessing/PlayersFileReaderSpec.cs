@@ -1,9 +1,8 @@
-namespace advisor.TurnProcessing;
+namespace advisor.facts;
 
 using System.IO;
 using System.Linq;
-using Xunit;
-using FluentAssertions;
+using advisor.TurnProcessing;
 
 public class PlayersFileReaderSpec {
     [Fact]

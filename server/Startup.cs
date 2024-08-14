@@ -37,6 +37,7 @@ using Microsoft.Extensions.Hosting;
 using advisor.TurnProcessing;
 using System.IO;
 using advisor.Authorization;
+using System.Net.Http;
 
 public class Startup {
     public Startup(IWebHostEnvironment env, IConfiguration configuration) {
@@ -313,7 +314,7 @@ public class Startup {
 
         app.UseForwardedHeaders();
         app.UseCors();
-        // app.UseResponseCompression();
+        app.UseResponseCompression();
 
         if (Env.IsProduction()) {
             app.UseHsts();

@@ -15,7 +15,7 @@ public class CompressionValueConversionSpec {
 
     [Fact]
     public void EmptyCompressInputProducesEmptyOutput() {
-        var data = new byte[0];
+        var data = Array.Empty<byte>();
 
         var output = CompressionValueConversion.Compress(data);
 
@@ -24,7 +24,7 @@ public class CompressionValueConversionSpec {
 
     [Fact]
     public void EmptyDecompressInputProducesEmptyOutput() {
-        var data = new byte[0];
+        var data = Array.Empty<byte>();
 
         var output = CompressionValueConversion.Decompress(data);
 

@@ -22,6 +22,7 @@ public static class Errors {
         (_, int.MaxValue) => Error.New(20_42, $"Value must have at least {min} characters long."),
          _                => Error.New(20_43, $"Value must be between {min} and {max} characters long.")
     };
+    public static readonly Error E_VALUE_MUST_MATCH_PATTERN = Error.New(20_40, "Value must match pattern.");
 
 
     public static readonly Error E_GAME_DOES_NOT_EXIST          = Error.New(30_00, "Game does not exist.");

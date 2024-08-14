@@ -1,6 +1,7 @@
 namespace advisor.Validators;
 
 using System;
+using System.Text.RegularExpressions;
 
 public static class StringValidators {
     public static Validation<Error, string> NotEmpty(string input) =>
@@ -17,4 +18,15 @@ public static class StringValidators {
                 .Where(x => x.Length >= minLen && x.Length <= maxLen)
                 .ToValidation(E_VALUE_MUST_BE_WITHIN_LENGTH(minLen, maxLen));
         };
+
+    public static Func<string, Validation<Error, string>> MinLenght(int min) =>
+        WithinLength(min, None);
+
+    public static Func<string, Validation<Error, string>> MaxLength(int max) =>
+        WithinLength(None, max);
+
+    public static Func<string, Validation<Error, string>> Pattern(Regex pattern) =>
+        input => Optional(input)
+            .Where(x => pattern.IsMatch(x))
+            .ToValidation(E_VALUE_MUST_MATCH_PATTERN);
 }

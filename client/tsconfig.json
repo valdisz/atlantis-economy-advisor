@@ -15,7 +15,6 @@
     "module": "esnext",
     "lib": [
       "dom",
-      "ESNext.Intl",
       "ESNext"
     ],
     "jsx": "react-jsx",

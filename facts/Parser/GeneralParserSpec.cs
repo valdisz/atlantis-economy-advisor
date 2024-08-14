@@ -1,51 +1,52 @@
-namespace advisor.facts {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-    using FluentAssertions;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-    using Pidgin;
-    using Xunit;
-    using Xunit.Abstractions;
+namespace advisor.facts; 
 
-    public class GeneralParserSpec {
-        public GeneralParserSpec(ITestOutputHelper output) {
-            this.output = output;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using FluentAssertions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Pidgin;
+using Xunit;
+using Xunit.Abstractions;
+
+public class GeneralParserSpec {
+    public GeneralParserSpec(ITestOutputHelper output) {
+        this.output = output;
+    }
+
+    private readonly ITestOutputHelper output;
+
+    [Theory]
+    [InlineData("35 skeletons [SKEL] (Combat 2/2, Attacks 2, Hits 2, Tactics 0)", 35, "skeletons", "SKEL", "Combat 2/2, Attacks 2, Hits 2, Tactics 0")]
+    [InlineData("35 skeletons [SKEL] (Combat 2/2, Attacks 2, Hits 2, Tactics 0), 24 horses [HORS], 6 undead [UNDE] (Combat 3/3, Attacks 12, Hits 12, Tactics 0)", 35, "skeletons", "SKEL", "Combat 2/2, Attacks 2, Hits 2, Tactics 0")]
+    public async Task ParseItem(string s, int amount, string name, string code, string props) {
+        var parser = new ItemParser();
+
+        TextParser tp = new(0, s);
+        var result = parser.Parse(tp).Value;
+
+        using StringWriter sw = new();
+        using (JsonWriter jw = new JsonTextWriter(sw)) {
+            await result.WriteJson(jw);
         }
 
-        private readonly ITestOutputHelper output;
+        dynamic o = JObject.Parse(sw.ToString());
+        int pAmount = o.amount;
+        string pCode = o.code;
+        string pName = o.name;
+        string pProps = o.props;
+        int? pPrice = o.price;
 
-        [Theory]
-        [InlineData("35 skeletons [SKEL] (Combat 2/2, Attacks 2, Hits 2, Tactics 0)", 35, "skeletons", "SKEL", "Combat 2/2, Attacks 2, Hits 2, Tactics 0")]
-        [InlineData("35 skeletons [SKEL] (Combat 2/2, Attacks 2, Hits 2, Tactics 0), 24 horses [HORS], 6 undead [UNDE] (Combat 3/3, Attacks 12, Hits 12, Tactics 0)", 35, "skeletons", "SKEL", "Combat 2/2, Attacks 2, Hits 2, Tactics 0")]
-        public async Task ParseItem(string s, int amount, string name, string code, string props) {
-            var parser = new ItemParser();
-
-            TextParser tp = new TextParser(0, s);
-            var result = parser.Parse(tp).Value;
-
-            using StringWriter sw = new StringWriter();
-            using (JsonWriter jw = new JsonTextWriter(sw)) {
-                await result.WriteJson(jw);
-            }
-
-            dynamic o = JObject.Parse(sw.ToString());
-            int pAmount = o.amount;
-            string pCode = o.code;
-            string pName = o.name;
-            string pProps = o.props;
-            int? pPrice = o.price;
-
-            pAmount.Should().Be(amount);
-            pCode.Should().Be(code);
-            pName.Should().Be(name);
-            pProps.Should().Be(props);
-        }
+        pAmount.Should().Be(amount);
+        pCode.Should().Be(code);
+        pName.Should().Be(name);
+        pProps.Should().Be(props);
+    }
 
 //         [Theory]
 //         [InlineData("War 1", "War", 1)]
@@ -1073,5 +1074,4 @@ namespace advisor.facts {
 
 //             result.Value.Children.Count.Should().Be(count);
 //         }
-    }
 }

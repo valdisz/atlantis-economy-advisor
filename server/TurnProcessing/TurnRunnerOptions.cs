@@ -10,16 +10,16 @@ public class TurnRunnerOptions {
         WorkingDirectory = workingDirectory;
     }
 
-    public string WorkingDirectory { get; set; }
-    public string EngineFileName { get; set; } = "engine";
-    public string PlayersInFileName { get; set; } = "players.in";
-    public string PlayersOutFileName { get; set; } = "players.out";
-    public string GameInFileName { get; set; } = "game.in";
-    public string GameOutFileName { get; set; } = "game.out";
-    public Regex ReportFileFomat { get; set; } = new Regex(@"report\.(\d+)$", RegexOptions.IgnoreCase);
-    public Regex TemplateFileFomat { get; set; } = new Regex(@"template\.(\d+)$", RegexOptions.IgnoreCase);
-    public Regex ArticleFileFormat { get; set; } = new Regex(@"times\.(\d+)$", RegexOptions.IgnoreCase);
-    public Func<FactionNumber, string> FactionOrdersFileName { get; set; } = number => $"orders.{number.Value}";
+    public string WorkingDirectory { get;  }
+    public string EngineFileName { get; init; } = "engine";
+    public string PlayersInFileName { get; init; } = "players.in";
+    public string PlayersOutFileName { get; init; } = "players.out";
+    public string GameInFileName { get; init; } = "game.in";
+    public string GameOutFileName { get; init; } = "game.out";
+    public Regex ReportFileFomat { get; init; } = new Regex(@"report\.(\d+)$", RegexOptions.IgnoreCase);
+    public Regex TemplateFileFomat { get; init; } = new Regex(@"template\.(\d+)$", RegexOptions.IgnoreCase);
+    public Regex ArticleFileFormat { get; init; } = new Regex(@"times\.(\d+)$", RegexOptions.IgnoreCase);
+    public Func<FactionNumber, string> FactionOrdersFileName { get; init; } = number => $"orders.{number.Value}";
 
     public static TurnRunnerOptions UseTempDirectory() {
         var tempPath = Path.GetTempPath();
@@ -31,6 +31,9 @@ public class TurnRunnerOptions {
 
         Directory.CreateDirectory(workDir);
 
-        return new TurnRunnerOptions(workDir);
+        return New(workDir);
     }
+
+    public static TurnRunnerOptions New(string workingDirectory)
+        => new (workingDirectory);
 }

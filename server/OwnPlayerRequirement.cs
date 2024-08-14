@@ -1,5 +1,6 @@
 namespace advisor.Authorization;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,10 +19,6 @@ public class OwnPlayerRequirement : IAuthorizationRequirement {
 
 public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequirement, IResolverContext> {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, IResolverContext resource) {
-        // if (resource.Operation.Operation != OperationType.Mutation || resource.Operation.Kind != SyntaxKind.OperationDefinition) {
-        //     return Task.CompletedTask;
-        // }
-
         var ids = GetIdArguments(resource);
         if (ids.Count == 0) {
             return Task.CompletedTask;
@@ -36,19 +33,10 @@ public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequi
             return Task.CompletedTask;
         }
 
-        if (EnsurePlayerAccess(context, requirement, allowedIds, ids)) {
-            return Task.CompletedTask;
-        }
-
-        if (EnsurePlayerTurnAccess(context, requirement, allowedIds, ids)) {
-            return Task.CompletedTask;
-        }
-
-        if (EnsureUnitAccess(context, requirement, allowedIds, ids)) {
-            return Task.CompletedTask;
-        }
-
-        if (EnsureRegionAccess(context, requirement, allowedIds, ids)) {
+        if (EnsurePlayerAccess(context, requirement, allowedIds, ids)
+            || EnsurePlayerTurnAccess(context, requirement, allowedIds, ids)
+            || EnsureUnitAccess(context, requirement, allowedIds, ids)
+            || EnsureRegionAccess(context, requirement, allowedIds, ids)) {
             return Task.CompletedTask;
         }
 
